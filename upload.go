@@ -1,13 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
+	"regexp"
 )
 
-// Response json from 2ch
+// ResponseSocPageList json from 2ch
 type ResponseSocPageList struct {
 	Threads []struct {
 		Files    int    `json:"files_count"`
@@ -15,6 +14,7 @@ type ResponseSocPageList struct {
 	} `json:"threads"`
 }
 
+// ResponseSocPage json from 2ch
 type ResponseSocPage struct {
 	Threads []struct {
 		Posts []struct {
@@ -27,28 +27,16 @@ type ResponseSocPage struct {
 var url = "https://2ch.hk/soc/index.json"
 
 func main() {
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-		os.Exit(1)
-	}
+	regex := os.Args[1]
+	streamRegex := regexp.MustCompile(regex)
+	dateTread := GetThreadNumber(url)
+	threadurl := "https://2ch.hk/soc/res/" + dateTread + ".json"
 
-	decoder := json.NewDecoder(resp.Body)
-	page := new(ResponseSocPageList)
-	zerr := decoder.Decode(&page)
-	if zerr != nil {
-		fmt.Println("error:", err)
-	}
-	dateTread := page.Threads[0].TreadNum
-
-	threadresp, err := http.Get("https://2ch.hk/soc/res/" + dateTread + ".json")
-	mecoder := json.NewDecoder(threadresp.Body)
-	lage := new(ResponseSocPage)
-	ferr := mecoder.Decode(&lage)
-	if ferr != nil {
-		fmt.Println("error:", err)
-	}
-	for number := range lage.Threads[0].Posts {
-		fmt.Println(lage.Threads[0].Posts[number].Comment)
+	page := GetThreadPage(threadurl)
+	for number := range page.Threads[0].Posts {
+		match := streamRegex.FindStringSubmatch(page.Threads[0].Posts[number].Comment)
+		if match != nil {
+			fmt.Println(page.Threads[0].Posts[number].Comment)
+		}
 	}
 }
