@@ -49,21 +49,17 @@ func outputComments(page *ResponseSocPage, streamRegex *regexp.Regexp) map[int]s
 			id := page.Threads[0].Posts[number].Num
 			comment := page.Threads[0].Posts[number].Comment
 			comments[id] = comment
-			fmt.Println(number)
 		}
 	}
 	return comments
 }
 
 func main() {
-	// databaseType := "mysql"
-	// dsn := "meetchan:fqlfh123@/meet"
-
 	regex := getRegex()
 	streamRegex := regexp.MustCompile(regex)
 
 	dateTread := GetThreadNumber(url)
 	threadurl := "https://2ch.hk/soc/res/" + dateTread + ".json"
 	page := GetThreadPage(threadurl)
-	fmt.Println(outputComments(page, streamRegex))
+	push2Database(outputComments(page, streamRegex))
 }

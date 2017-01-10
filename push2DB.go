@@ -1,31 +1,38 @@
 package main
 
-//
-// import (
-// 	"database/sql"
-// )
-//
-// func push2Database(db *sql.DB, message string, id int) {
-//   rows, err := db.Query(select "id from meet")
-//   if err != nil {
-//     log.Fatal(err)
-//   }
-//   defer rows.Close()
-//   for rows.Next() {
-//     err := rows.Scan(&id, &string)
-//   }
-// }
+import (
+	"database/sql"
+	"fmt"
+	"log"
 
-//   for {
-// 		rows, err := db.Query(query)
-// 		if err != nil {
-// 			waitAndReconnect()
-// 		}
-// 		if rows != nil {
-// 			state = true
-// 		} else {
-// 			state = false
-// 		}
-// 		time.Sleep(time.Second * 1)
-// 	}
-// }
+	_ "github.com/mattn/go-sqlite3"
+)
+
+func push2Database(comments map[int]string) {
+	db, err := sql.Open("sqlite3", "./test.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for absNumber, comment := range comments {
+		stmt, err := db.Prepare("INSERT INTO comments(abs_number, comment) values(?,?)")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// UNIQUE constraint failed: comments.abs_number
+		// сделать проверку на уникальность absNumber
+		res, err := stmt.Exec(absNumber, comment)
+		if err != nil {
+			log.Fatal(err)
+		}
+		id, err := res.LastInsertId()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(id)
+	}
+}
