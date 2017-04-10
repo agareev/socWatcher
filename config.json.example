@@ -1,0 +1,5 @@
+{
+  "DBIP": "myip:myport",
+  "DBLogin":  "mylogin",
+  "DBPass":   "mypass"
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -29,8 +30,28 @@ type ResponseSocPage struct {
 	} `json:"threads"`
 }
 
+// Config is type to parse config.json
+type Config struct {
+	DBIP    string
+	DBLogin string
+	DBPass  string
+}
+
 var url = "https://2ch.hk/soc/index.json"
 var regex string
+var configuration Config
+
+// ReadConfig is function for read jsonconf
+func ReadConfig(path string) Config {
+	file, _ := os.Open(path)
+	decoder := json.NewDecoder(file)
+	configuration := new(Config)
+	err := decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	return *configuration
+}
 
 func getRegex() string {
 	if len(os.Args) > 1 {
@@ -52,6 +73,10 @@ func outputComments(page *ResponseSocPage, streamRegex *regexp.Regexp) map[int]s
 		}
 	}
 	return comments
+}
+
+func init() {
+	configuration = ReadConfig("config.json")
 }
 
 func main() {
