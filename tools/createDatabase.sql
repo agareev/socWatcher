@@ -1,5 +1,4 @@
 create table `comments` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-  `abs_number` INTEGER,
+  `abs_number` INTEGER PRIMARY KEY,
   `comment` TEXT
   );
